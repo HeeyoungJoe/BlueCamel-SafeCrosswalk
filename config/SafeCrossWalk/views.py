@@ -8,12 +8,12 @@ Drivers.signal="A pedestrian is attempting to cross the road!"
 
 
 class UserView(generic.View):
-  def getCars(self,validated_data):
+  def getCars(self):
     filDistCars=[car for car in Drivers.objects.filter('distance') if car.distance<500]
     #제일 위험한건 제동거리가 제일
     #the one that might be the most dangerous
     return JsonResponse({'cars':filDistCars})
-  def getCarAlert(self,validated_data):
+  def getCarAlert(self):
     filteredCars = [car for car in Drivers.objects.filter('distance') if car.distance < 500 and car.is_incoming == True]
     most_dangerous = filteredCars.order_by('-brake')[0]
     safe=False
@@ -28,11 +28,19 @@ class UserView(generic.View):
 
 
 class DriverView(generic.View):
-  def update(user_lat, user_lon, car_id, car_lat, car_lon):
-    car = Drivers.objects.get(id=car_id)
+
+  def get(self,request):#user_lat, user_lon, car_id, car_lat, car_lon):
+    car = Drivers.objects.get(id=request.car_id)
+
+    if(car is None):
+      car=Drivers.objects.create(id=request.car_id)
+
     car.brake = 1
+    '''
     car.prevlat = car_lat
-    car.prevlon = car_lon
+    car.prevlon = car_lon'''
     car.distance = 1
     car.is_incoming = True
-    return JsonResponse({'msg':"Okay!"})
+    #return JsonResponse({'msg':"Okay!"})
+
+    return JsonResponse({'msg':"Okay!"}, json_dumps_params={'ensure_ascii': True})
