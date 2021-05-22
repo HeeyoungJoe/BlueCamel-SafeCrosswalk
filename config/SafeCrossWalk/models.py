@@ -4,10 +4,14 @@ from django.db import models
 
 class Drivers(models.Model):
     id=models.IntegerField(primary_key=True)
+    signal=models.BooleanField(default=False)
+    class Metha:
+        ordering=['id']
 
 class User(models.Model):
     id=models.IntegerField(primary_key=True)
 
 class Crosswalk(models.Model):
     wuido=models.FloatField()
-    gyeondo=models.FloatField()
+    gyeongdo=models.FloatField()
+    has_trlight=models.BooleanField(default=True)
