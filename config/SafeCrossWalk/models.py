@@ -13,8 +13,6 @@ class Drivers(models.Model):
     brake=models.FloatField(default=0.0)
     is_incoming=models.BooleanField(default=0.0)
 
-#class User(models.Model):
-    #id=models.IntegerField(primary_key=True)
 
 
 class Crosswalk(models.Model):
