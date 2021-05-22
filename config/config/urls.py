@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from SafeCrossWalk.views import *
+from SafeCrossWalk.views import UserView, DriverView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/',UserView.as_view()),
-    path('driver/',DriverView.as_view())
+    path('user/', UserView.as_view()),
+    path('driver/', DriverView.as_view()),
 ]

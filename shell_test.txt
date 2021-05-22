@@ -1,0 +1,3 @@
+# D(signal=None, prevlat=1, prevlon=1, curlat=37.559927, curlon=126.9378974, distance=99999, brake=99999, is_incoming=True).save()
+# D(signal=None, prevlat=1, prevlon=1, curlat=37.551523, curlon=126.937593, distance=99999, brake=99999, is_incoming=True).save()
+# D(signal=None, prevlat=1, prevlon=1, curlat=37.560172, curlon=126.939630, distance=99999, brake=99999, is_incoming=True).save()
