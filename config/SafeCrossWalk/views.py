@@ -125,6 +125,8 @@ class UserView(View):
     car.signal = "400"
     car.save()
 
+
+
 class DriverView(View):
   def get(self,request):
     # Car의 lat, lon 를 받아온다
