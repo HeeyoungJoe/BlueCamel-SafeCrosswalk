@@ -11,7 +11,6 @@ from django.core import serializers
 from SafeCrossWalk.search_crosswalk import getNearestCrossWalk
 from SafeCrossWalk.simple_braking_model import simplemodel
 import numpy as np
-import faiss
 import os
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -48,7 +47,7 @@ class UserView(View):
   def _getGap(self, a_lat, a_lon, b_lat, b_lon):
     start = (float(a_lat), float(a_lon)) # (lat, lon)
     goal = (float(b_lat), float(b_lon))
-    return abs(haversine(start, goal))
+    return abs(haversine(start, goal)) * 1000
 
 
   """
@@ -63,8 +62,9 @@ class UserView(View):
     distance = self._getNearestCrosswalk(lat, lon)
     if type(distance) == list:
       distance = distance[0]
-    print(distance)
+    print("distance:", distance)
     # distance /= 200
+
 
     if 20 < distance < 50: # 근처에 횡단보도
       return JsonResponse({"msg":"WAIT"}, content_type="application/json")
@@ -72,32 +72,30 @@ class UserView(View):
     elif 50 <= distance: # 횡단보도 없음 (instant 횡단보도)
       cars = self._collectCarToNotify(lat, lon)
       if cars != None:
-        self._sendAlert(cars) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
+        for car in cars:
+          self._sendAlert(car) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
 
       return JsonResponse({"msg":"INSTANT_CROSSWALK"}, content_type="application/json")
 
     else: # 지금 횡단보도 앞
       cars = self._collectCarToNotify(lat, lon)
-      print(cars)
       if cars is None:
-        print(1)
         return JsonResponse({'msg':'GO'}, content_type="application/json")
 
-      self._sendAlert(cars)
+      for car in cars:
+        self._sendAlert(car)
 
       nearestCar = cars[0]
       isDangerous = self._isTooDangerous(nearestCar, lat, lon)
-      distance = self._getGap(nearestCar.curlat, nearestCar.curlon, lat, lon) * 1000 # meter
+      distance = self._getGap(nearestCar.curlat, nearestCar.curlon, lat, lon) # meter
       if isDangerous:
-        print(2)
         return JsonResponse({"msg":"STOP", "distance": distance}, content_type="application/json")
       else:
-        print(3)
         return JsonResponse({"msg":"GO"}, content_type="application/json")
 
   def _getNearestCrosswalk(self, lat, lon):
-    current_loc = [float(lat), float(lon)]
-    print(current_loc)
+    # current_loc = [np.float32(lat), np.float32(lon)]
+    current_loc = [np.float32(37.631107), np.float32(126.92779)]
     crlocations = np.load("./test_vectorset.npy")
     return getNearestCrossWalk([current_loc], crlocations)
 
@@ -109,7 +107,7 @@ class UserView(View):
     for car in cars:
       userCarDistance = self._getGap(car.curlat, car.curlon, lat, lon)
       # 500 미터 안쪽인지 && 다가오고 있는지
-      if userCarDistance <= 0.5 and userCarDistance < self._getGap(car.prevlat, car.prevlon, lat, lon):
+      if userCarDistance <= 500 and userCarDistance <= self._getGap(car.prevlat, car.prevlon, lat, lon):
         result.append(car)
 
     if len(result) == 0:
@@ -125,7 +123,8 @@ class UserView(View):
     return braking_distance
 
   def _sendAlert(self, car):
-    print(car.id)
+    car.signal = "400"
+    car.save()
 
 
 ###########################################################################
