@@ -4,9 +4,8 @@ LATENCY = 1
 DRIVER_RESPONSE = 1
 
 
-def simplemodel(initspeed, brake_acc = 3 ):
+def simplemodel(vehicle_Initial_Speed, brake_acc = 4 ):
 
-    vehicle_Initial_Speed = initspeed / 3.6;
     vehicle_Mass = 1145;
 
     distance = (vehicle_Initial_Speed**2)/(2*brake_acc)
@@ -14,11 +13,13 @@ def simplemodel(initspeed, brake_acc = 3 ):
     return distance, time
 
 def simplecheckBraking(velocity, distance, safe_time = 5):
+    velocity = velocity / 3.6
+    #print(velocity)
     braking_distance, arrival_time = simplemodel(velocity)
 
     safe_distance = (safe_time + LATENCY+DRIVER_RESPONSE) * velocity + braking_distance
     critical_distance = (LATENCY+DRIVER_RESPONSE)*velocity + braking_distance
-
+    #print(critical_distance)
     if distance < critical_distance:
         return 1
     if distance <= safe_distance :
@@ -30,5 +31,6 @@ def simplecheckBraking(velocity, distance, safe_time = 5):
 
 
 
-print(simplemodel(100))
+#print(simplemodel(100))
+#print(simplecheckBraking(100,200, safe_time=5))
 
