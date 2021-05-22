@@ -5,7 +5,6 @@ from django.http import JsonResponse
 from django.views import generic
 from django.views.generic.base import View
 from .models import Drivers
-from django.contrib import messages
 from haversine import haversine
 from django.core import serializers
 from SafeCrossWalk.search_crosswalk import getNearestCrossWalk
@@ -144,20 +143,27 @@ class UserView(View):
     #when not, still alert cars but 보행자 get different message
 
 
-class DriverView(generic.View):
+class DriverView(View):
+  def get(self,request):
+    # Car의 lat, lon 를 받아온다
+    lat = request.GET.get('lat', None)
+    lon = request.GET.get('lon', None)
+    #"나"인 자동차 객체를 찾는다
+    car=Drivers.objects.filter(id=request.id)
+    #객체 내의 위도 정보를 갱신한다.
+    car.prevlat=car.curlat
+    car.prevlon=car.curlon
+    car.curlat=lat
+    car.curlon=lon
+    car.save()
 
-  def get(self,request):#user_lat, user_lon, car_id, car_lat, car_lon):
-    car = Drivers.objects.get(id=request.car_id)
+    #500미터 근방에 횡단보도가 있다면면 보행자...정보 모으기 -later
 
-    if(car is None):
-      car=Drivers.objects.create(id=request.car_id)
+    #시그널이 있으면
+    if car.signal_isnull==False:
+      signal_msg=car.signal #여기에 옮겨놓고
+      car.signal=None #도로 None으로 채워주고
+      car.save
+      return JsonResponse({'car_msg':signal_msg}) #메세지는 보낸다.
 
-    car.brake = 1
-    '''
-    car.prevlat = car_lat
-    car.prevlon = car_lon'''
-    car.distance = 1
-    car.is_incoming = True
-    #return JsonResponse({'msg':"Okay!"})
 
-    return JsonResponse({'msg':"Okay!"}, json_dumps_params={'ensure_ascii': True})
