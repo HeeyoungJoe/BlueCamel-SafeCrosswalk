@@ -125,7 +125,7 @@ class UserView(View):
     return braking_distance
 
   def _sendAlert(self, car, lat, lon):
-    userCarDistance = self._getGap(car.curlat, car.curlon, lat, lon):
+    userCarDistance = self._getGap(car.curlat, car.curlon, lat, lon)
     car.signal = str(userCarDistance)
     car.save()
 
