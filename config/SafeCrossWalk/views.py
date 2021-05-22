@@ -9,10 +9,10 @@ from haversine import haversine
 from django.core import serializers
 from SafeCrossWalk.search_crosswalk import getNearestCrossWalk
 from SafeCrossWalk.simple_braking_model import simplemodel
-import numpy as np
 import os
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+import numpy as np
 
 
 Drivers.signal="A pedestrian is attempting to cross the road!"
@@ -28,7 +28,7 @@ class UserView(View):
     lat = req.GET.get('lat', None)
     lon = req.GET.get('lon', None)
 
-    cars = self._getNearCars(lat, lon, 0.5) # 0.5 km
+    cars = self._getNearCars(lat, lon, 500)
 
     return HttpResponse(serializers.serialize('json', cars), content_type="application/json")
 
@@ -37,8 +37,11 @@ class UserView(View):
     cars = Drivers.objects.all()
     cars_arr = []
 
+    print(cars)
+
     for car in cars:
       if self._getGap(car.curlat, car.curlon, user_lat, user_lon) <= distance:
+        print("Car added")
         cars_arr.append(car)
 
     return cars_arr
