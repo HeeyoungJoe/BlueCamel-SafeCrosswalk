@@ -5,7 +5,7 @@ from django.db import models
 class Drivers(models.Model):
     id=models.IntegerField(primary_key=True)
     signal=models.BooleanField(default=False)
-    class Metha:
+    class Meta:
         ordering=['id']
 
 class User(models.Model):
