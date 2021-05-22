@@ -9,6 +9,7 @@ from django.contrib import messages
 from haversine import haversine
 from django.core import serializers
 from SafeCrossWalk.search_crosswalk import getNearestCrossWalk
+from SafeCrossWalk.simple_braking_model import simplemodel
 import numpy as np
 import faiss
 import os
@@ -62,19 +63,24 @@ class UserView(View):
     distance = self._getNearestCrosswalk(lat, lon)
     if type(distance) == list:
       distance = distance[0]
+    print(distance)
+    # distance /= 200
 
     if 20 < distance < 50: # 근처에 횡단보도
       return JsonResponse({"msg":"WAIT"}, content_type="application/json")
 
     elif 50 <= distance: # 횡단보도 없음 (instant 횡단보도)
       cars = self._collectCarToNotify(lat, lon)
-      self._sendAlert(cars) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
+      if cars != None:
+        self._sendAlert(cars) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
 
       return JsonResponse({"msg":"INSTANT_CROSSWALK"}, content_type="application/json")
 
     else: # 지금 횡단보도 앞
       cars = self._collectCarToNotify(lat, lon)
+      print(cars)
       if cars is None:
+        print(1)
         return JsonResponse({'msg':'GO'}, content_type="application/json")
 
       self._sendAlert(cars)
@@ -83,13 +89,16 @@ class UserView(View):
       isDangerous = self._isTooDangerous(nearestCar, lat, lon)
       distance = self._getGap(nearestCar.curlat, nearestCar.curlon, lat, lon) * 1000 # meter
       if isDangerous:
+        print(2)
         return JsonResponse({"msg":"STOP", "distance": distance}, content_type="application/json")
       else:
+        print(3)
         return JsonResponse({"msg":"GO"}, content_type="application/json")
 
   def _getNearestCrosswalk(self, lat, lon):
     current_loc = [float(lat), float(lon)]
-    crlocations = np.load(os.getcwd() + "/SafeCrossWalk/test_vectorset.npy")
+    print(current_loc)
+    crlocations = np.load("./test_vectorset.npy")
     return getNearestCrossWalk([current_loc], crlocations)
 
   # 리턴하는 리스트 안의 첫번째 인덱스가 무조건 제일 가까운 차량으로 가정한다
@@ -111,10 +120,15 @@ class UserView(View):
     return self._calculateBrakeDistance(nearestCar) > self._getGap(nearestCar.curlat, nearestCar.curlon, lat, lon)
 
   def _calculateBrakeDistance(self, car):
-    return 100
+    velocity = 100 #collected velocity
+    braking_distance, braking_time = simplemodel(velocity)
+    return braking_distance
 
-  ############################
+  def _sendAlert(self, car):
+    print(car.id)
 
+
+###########################################################################
 
   def getCarAlert(self,validated_data):
     filteredCars = [car for car in Drivers.objects.filter('distance') if car.distance < 500 and car.is_incoming == True]
