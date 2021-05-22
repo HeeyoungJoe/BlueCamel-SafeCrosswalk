@@ -8,6 +8,10 @@ Drivers.signal="A pedestrian is attempting to cross the road!"
 
 
 class UserView(generic.View):
+
+
+
+
   def getCars(self,validated_data):
     filDistCars=[car for car in Drivers.objects.filter('distance') if car.distance<500]
     #제일 위험한건 제동거리가 제일
