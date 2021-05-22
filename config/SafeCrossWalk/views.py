@@ -75,7 +75,7 @@ class UserView(View):
       cars = self._collectCarToNotify(lat, lon)
       if cars != None:
         for car in cars:
-          self._sendAlert(car) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
+          self._sendAlert(car, lat, lon) # 주변에 있는 차들에게 경고를 보냄 <TODO: SECRET_MISSION>
 
       return JsonResponse({"msg":"INSTANT_CROSSWALK"}, content_type="application/json")
 
@@ -85,7 +85,7 @@ class UserView(View):
         return JsonResponse({'msg':'GO'}, content_type="application/json")
 
       for car in cars:
-        self._sendAlert(car)
+        self._sendAlert(car, lat, lon)
 
       nearestCar = cars[0]
       isDangerous = self._isTooDangerous(nearestCar, lat, lon)
