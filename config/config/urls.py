@@ -18,6 +18,6 @@ from django.urls import path,include
 from SafeCrossWalk.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/',UserView.as_view),
+    path('user/',UserView.as_view()),
     path('driver/',DriverView.as_view())
 ]
