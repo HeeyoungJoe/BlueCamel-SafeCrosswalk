@@ -125,44 +125,31 @@ class UserView(View):
     car.signal = "400"
     car.save()
 
-
-###########################################################################
-
-  def getCarAlert(self,validated_data):
-    filteredCars = [car for car in Drivers.objects.filter('distance') if car.distance < 500 and car.is_incoming == True]
-    most_dangerous = filteredCars.order_by('-brake')[0]
-    safe=False
-    #determine if it is safe
-
-    if safe==True:
-      return JsonResponse({'user_msg':0,'cars':filteredCars})
-    else:
-      return JsonResponse({'user_msg':1,'cars':filteredCars})
-    #when safe, alert 보행자 &cars
-    #when not, still alert cars but 보행자 get different message
-
-
 class DriverView(View):
   def get(self,request):
     # Car의 lat, lon 를 받아온다
     lat = request.GET.get('lat', None)
     lon = request.GET.get('lon', None)
-    #"나"인 자동차 객체를 찾는다
-    car=Drivers.objects.filter(id=request.id)
-    #객체 내의 위도 정보를 갱신한다.
+    _id = int(request.GET.get('id', None))
+    car=Drivers.objects.filter(id=_id)
+    if len(car) == 0:
+      car=Drivers.objects.create(id=_id)
+    else:
+      car = car[0]
+
     car.prevlat=car.curlat
     car.prevlon=car.curlon
     car.curlat=lat
     car.curlon=lon
     car.save()
 
-    #500미터 근방에 횡단보도가 있다면면 보행자...정보 모으기 -later
-
-    #시그널이 있으면
-    if car.signal_isnull==False:
+    #시그널이 있으면 해당 정보는 전송하고 signal 값은 다시 초기화
+    if car.signal != None and len(car.signal) > 0:
       signal_msg=car.signal #여기에 옮겨놓고
       car.signal=None #도로 None으로 채워주고
-      car.save
-      return JsonResponse({'car_msg':signal_msg}) #메세지는 보낸다.
+      car.save()
+      return JsonResponse({'car_msg':signal_msg}, content_type="application/json") #메세지는 보낸다.
+    else:
+      return JsonResponse({}, content_type="application/json") #메세지는 보낸다.
 
 
