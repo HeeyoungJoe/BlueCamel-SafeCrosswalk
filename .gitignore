@@ -148,7 +148,8 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
-
+.idea
+*.csv
 # operating system-related files
 # file properties cache/storage on macOS
 *.DS_Store
