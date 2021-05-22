@@ -4,14 +4,20 @@ from django.db import models
 
 class Drivers(models.Model):
     id=models.IntegerField(primary_key=True)
-    signal=models.BooleanField(default=False)
-    class Meta:
-        ordering=['id']
+    signal=models.CharField(max_length=100,blank=True, null=True)
+    prevlat=models.FloatField(default=0.0)
+    prevlon=models.FloatField(default=0.0)
+    distance=models.FloatField(default=0.0)
+    curlat=models.FloatField(default=0.0)
+    curlon=models.FloatField(default=0.0)
+    brake=models.FloatField(default=0.0)
+    is_incoming=models.BooleanField(default=0.0)
 
-class User(models.Model):
-    id=models.IntegerField(primary_key=True)
+#class User(models.Model):
+    #id=models.IntegerField(primary_key=True)
+
 
 class Crosswalk(models.Model):
-    wuido=models.FloatField()
-    gyeongdo=models.FloatField()
+    lat=models.FloatField()
+    lon=models.FloatField()
     has_trlight=models.BooleanField(default=True)

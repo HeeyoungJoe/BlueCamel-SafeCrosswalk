@@ -1,42 +1,33 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import generic
-from .models import User,Drivers,Crosswalk
+from .models import Drivers
 from django.contrib import messages
-def chooseCars():
-  pass
-def signal_cars(req):
-  messages.add_message(req,messages.INFO,"You must slow down. Pedestrian about to cross!")
- pass
-def collect_cars():
-  #get car sets that are closer than ??
-  #get car speed
-  #get car 제동거리
-  # determine if the cars need signal
-  chooseCars()
-  #select cars that need signal
-  selected_drivers=Drivers.objects.get(signal=True)
-  #add message inside shared message
-  try:
-    signal_cars(selected_drivers)
-  except(messages.WARNING.)
-  #delete message
-  #return cars that are signaled
-  return JsonResponse({'drivers':selected_drivers})
+Drivers.signal="A pedestrian is attempting to cross the road!"
 
-def index(req):
-  # to FE : "give a unique id for each user"
-  if(req.method=='POST'):
-    #register user info
-    user=User.objects.create(req.readlines())
-  # get : UniqueID / Lan / Long
-  if(req.method=='GET'):
-    user=User.objects.filter(id==req.id)
-  # save (overwrite) user to server
-  user.save()
-  # Send notification to nearby cars
-  cars = collect_cars()
+def update(user_lat,user_lon,car_id,car_lat,car_lon):
+  car=Drivers.objects.get(id=car_id)
+  car.brake=1
+  car.prevlat=car_lat
+  car.prevlon=car_lon
+  car.distance=1
+  car.is_incoming=True
 
-  return JsonResponse( {} )
+class MyView(generic.View):
+  def getCars(self,validated_data):
+    filDistCars=[car for car in Drivers.objects.filter('distance') if car.distance<500]
+    #제일 위험한건 제동거리가 제일
+    #the one that might be the most dangerous
+    return JsonResponse({'cars':filDistCars})
+  def getCarAlert(self,validated_data):
+    filteredCars = [car for car in Drivers.objects.filter('distance') if car.distance < 500 and car.is_incoming == True]
+    most_dangerous = filteredCars.order_by('-brake')[0]
+    safe=False
+    #determine if it is safe
 
-
+    if safe==True:
+      return JsonResponse({'user_msg':0,'cars':filteredCars})
+    else:
+      return JsonResponse({'user_msg':1,'cars':filteredCars})
+    #when safe, alert 보행자 &cars
+    #when not, still alert cars but 보행자 get different message
