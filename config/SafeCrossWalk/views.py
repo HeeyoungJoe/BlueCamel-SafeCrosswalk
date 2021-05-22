@@ -124,8 +124,9 @@ class UserView(View):
     braking_distance, braking_time = simplemodel(velocity)
     return braking_distance
 
-  def _sendAlert(self, car):
-    car.signal = "400"
+  def _sendAlert(self, car, lat, lon):
+    userCarDistance = self._getGap(car.curlat, car.curlon, lat, lon):
+    car.signal = str(userCarDistance)
     car.save()
 
 
