@@ -19,3 +19,7 @@ class Crosswalk(models.Model):
     lat=models.FloatField()
     lon=models.FloatField()
     has_trlight=models.BooleanField(default=True)
+
+
+
+
