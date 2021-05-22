@@ -73,11 +73,19 @@ class UserView(View):
 
 
 class DriverView(generic.View):
-  def update(user_lat, user_lon, car_id, car_lat, car_lon):
-    car = Drivers.objects.get(id=car_id)
+
+  def get(self,request):#user_lat, user_lon, car_id, car_lat, car_lon):
+    car = Drivers.objects.get(id=request.car_id)
+
+    if(car is None):
+      car=Drivers.objects.create(id=request.car_id)
+
     car.brake = 1
+    '''
     car.prevlat = car_lat
-    car.prevlon = car_lon
+    car.prevlon = car_lon'''
     car.distance = 1
     car.is_incoming = True
-    return JsonResponse({'msg':"Okay!"})
+    #return JsonResponse({'msg':"Okay!"})
+
+    return JsonResponse({'msg':"Okay!"}, json_dumps_params={'ensure_ascii': True})
