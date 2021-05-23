@@ -13,7 +13,6 @@ We aim to resolve three main criteria
 * Ensure safer crossing in case of rural areas where no crosswalk prepared
 * Suggest regulations between a pedestrian and drivers at places where all traffic light is either temporarily or always replaced with flashing orange light
 
-(User GUI 사진 업로드)
 
 #### Pedestrian side
 To ensure safety, the user simply can press the 'Notify' button to alert nearby cars that he or she is about to cross the road. However, if the system analyzes that the car is unable to stop before the pedestrian, it will alert the user to stop and wait for the car to pass for a remote minute. Also, if the user attempts cross roads where it is not a crosswalk, a verbal message will suggest the user to go look for the nearest crosswalk with the distance to the area unless it is a rural area with no crosswalk equipped. 
@@ -28,6 +27,53 @@ Whenever a driver comes within 500m boundary crosswalk and if a pedestrian has n
 UserView is a class-based view that inherits 
 '''from django.views.generic.base import View'''
 
+**def get(self, req)
+
+purpose: It serialized series of cars that is within 500m boundary.
+
+	input: it needs user's lattitude, longitude.
+	return: HttpResponse(serializers.serialize('json', cars),content_type="application/json")
+	* cars is serializer of cars near user. 
+
+
+def post(self, req)
+
+purppse: if the user has pressed the 'Notify' button, the function returns messages to send to the user in Json. 
+
+	input: user's latitude, longitude is required. 
+	return:
+	if user is only 20~50m away from the crosswalk
+		return JsonResponse({"msg":"WAIT"}, content_type="application/json")
+
+	if user is more than 50m away from the crosswalk
+		JsonResponse({"msg":"INSTANT_CROSSWALK"}, content_type="application/json")
+
+	if user is only 20m away from the crosswalk 
+		if high possibility of an accident:  return JsonResponse({"msg":"STOP", "distance": distance}
+		if low possibility of an accident: JsonResponse({"msg":"GO"}, content_type="application/json")
+		* distance is float refering to user's and driver's distance. 
+    
+
+
+
+### DriverView
+It inherits '''from django.views.generic.base import View'''
+
+def get(self,req)
+  
+purpose: from the frontends, it receives longitude and latitude of the car and updates prevlat, prevlon, curlat, curlon referring to previous and current longitude&latitude pair. Also, if there is a message to send to drivers, it attaches it in Json.
+
+    input: needs the car's latitude, longitude. 
+    return:
+    if user/pedestrian has sent the driver a message
+      JsonResponse({'car_msg':signal_msg}, content_type="application/json")
+      *signal_msg는 CharField(manx_length=100)으로 받은 string입니다.
+    else
+      return JsonResponse({}, content_type="application/json") 
+
+
+  
+
 
 ## (KOR)
 
@@ -39,21 +85,20 @@ UserView is a class-based view that inherits
 세 가지 중점적인 문제점을 해결하고자 합니다
 * 차량이 신호등이 없는 횡단보도를 건너고자 하는 보행자를 파악하지 못하는 상황을 회피합니다. 
 * 횡단보도가 없는 지역에서 안전한 횡단을 지원합니다. 
-* 모든 신호가 깜박이는 주황 신호로 이루어진 지역에서 보행자가 Suggest regulations between a pedestrian and drivers at places where all traffic light is either temporarily or always replaced with flashing orange light
+* 모든 신호가 깜박이는 주황 신호로 이루어진 지역의 보행자 안전을 보장합니다. 
 
+#### 보행자 페이지
+보행자는 'Notify' 버튼만 누르면 됩니다. 시스템이 보행자가 횡단보도를 건널 시 차와의 충돌이 피할 수 없다고 판단한다면 음성&화면 메세지로 가지 말 것을 알립니다. 또한, 만약 버튼이 횡단보도가 가까이 있음에도 근처에서 눌리지 않는다면, 하지 않아도 될 무단횡단을 시도하는 것으로 간주하고 가까운 횡단보도까지의 거리를 알려주며 회유합니다. 
 
-#### Pedestrian side
-To ensure safety, the user simply can press the 'Notify' button to alert nearby cars that he or she is about to cross the road. However, if the system analyzes that the car is unable to stop before the pedestrian, it will alert the user to stop and wait for the car to pass for a remote minute. Also, if the user attempts cross roads where it is not a crosswalk, a verbal message will suggest the user to go look for the nearest crosswalk with the distance to the area unless it is a rural area with no crosswalk equipped. 
-
-#### Driver side
-Whenever a driver comes within 500m boundary crosswalk and if a pedestrian has notified to cross roads, a verbal message will explain the driver to reduce speed with the distance between the vehicle and the pedestrian. 
+#### 드라이버 페이지
+차량이 횡단보도와 500m 안팏으로 가까울 때 보행자가 길을 건너려고 한다면, 드라이버에게 상황 설명과 함께 감속을 권유하는 음성 메세지가 발행됩니다. 
 
 ## API 설명서 
 
 ### UserView
 '''from django.views.generic.base import View'''를 바탕으로 한 클래스형 view입니다. 
 
-def get(self, req)
+**def get(self, req)
 
 의도: 앱 실행시 보이는 user 근처(500m근방)의 차량 위경도를 전달하기 위해 차량 객체를 필터해서 serialize한 후 Json형태로 변환합니다.
 
