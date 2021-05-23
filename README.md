@@ -37,9 +37,9 @@ UserView is a class-based view that inherits
 ### 어떻게 쓰이나요? 🖱️
 
 세 가지 중점적인 문제점을 해결하고자 합니다
-* Avoid the situation where car owners are unaware of a pedestrian attempting to use a crosswalk without traffic signals
-* Ensure safer crossing in case of rural areas where no crosswalk prepared
-* Suggest regulations between a pedestrian and drivers at places where all traffic light is either temporarily or always replaced with flashing orange light
+* 차량이 신호등이 없는 횡단보도를 건너고자 하는 보행자를 파악하지 못하는 상황을 회피합니다. 
+* 횡단보도가 없는 지역에서 안전한 횡단을 지원합니다. 
+* 모든 신호가 깜박이는 주황 신호로 이루어진 지역에서 보행자가 Suggest regulations between a pedestrian and drivers at places where all traffic light is either temporarily or always replaced with flashing orange light
 
 
 #### Pedestrian side
